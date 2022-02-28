@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="../node_modules/bootstrap/dist/css/bootstrap.css">
+    <title>House App</title>
+</head>
+<body class="container">
+    <div id="new-house" class="jumbotron">
+        <h2>New House</h2>
+        <input type="text" class="form-control" id="new-house-name"> <br>
+        <button id="create-new-house" class="btn btn-primary form-control">Create</button>
+        <!-- form control makes the button expand acroos the full length -->
+    </div>
+    
+
+    <div id="app">
+        <!-- div to store all the new houses that are created using ajax to read it from the api-->
+    </div>
+    <script src="../node_modules/jquery/dist/jquery.js"></script>
+    <script src="../js/index.js"></script>
+    <script src="../node_modules/bootstrap/dist/js/bootstrap.bundle.js"></script>
+</body>
+</html>

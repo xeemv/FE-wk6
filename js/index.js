@@ -124,3 +124,47 @@ class HouseService{
 /*======================================================*/
 // where the hard work will happen
 // will repaint or rerender our dom each time we create a new class
+// create the DOM Manager class
+// use top-down process
+class DOMManager{
+    static houses;
+    // this is a veriable
+    // used to represent all the houses in this class
+
+    static getAllHouses(){
+    // will call the getAllHouses method from inside the service class
+    // render them to the DOM
+        HouseService.getAllHouses().then(houses => this.render(houses));
+        // use the house service to getAllHouses
+        // return a promise using ---> .then
+        // when we get back, it will call houses
+        // this takes a call back that we will pass into this.render
+    }
+
+    // build out the render method
+    static render(houses){
+        // will render to the dom
+        this.houses = houses;
+        $('#app').empty();
+        // jquery to find the app by html id
+        // empty the app div then rerender everything
+        for(let house of houses){
+        // use a for loop
+            $("#app").prepend(
+                // using prepend so the newest one shows up on top
+                // now build the HTML for every single house
+                // write the html in js using template literals
+                `<div id="${house._id}" class="card">
+                    <div class="card-header">
+                    <h2>${house.name}</h2>
+                    <button class="btn btn-danger" onclick="DOMManager.deleteHouse("${house._id}")">Delete</delete>
+                    </div>
+                </div>
+                `
+            );
+        }
+    }
+}
+
+
+DOMManager.getAllHouses();

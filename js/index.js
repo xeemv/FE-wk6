@@ -9,7 +9,7 @@
  *        in the app
  *      - clear it out and then repopulate the houses
  */
-
+console.log("hi");
 // basic block
 class House{
     constructor(name){
@@ -33,10 +33,10 @@ class Room{
     }
 }
 
-// create the service
+// create the service class to store our methods
 // how will we send the https request
 class HouseService{
-    static url ='https://ancient-taiga-31359.herokuapp.com/api/houses';
+    static url = "https://ancient-taiga-31359.herokuapp.com/api/houses"; 
     // root url for all the endpoints we are going to call to the api
 
     /*
@@ -141,6 +141,63 @@ class DOMManager{
         // this takes a call back that we will pass into this.render
     }
 
+    // create house
+    static createHouse(name){
+        HouseService.createHouse(new House(name))
+        // creating a new instance of a house with the new House name
+        // the class for house is on code line 14
+        .then(() => {
+            // .then to handle a promise
+            return HouseService.getAllHouses();
+            // get all the houses from the api + the new house
+        })
+        .then((houses) => this.render(houses));
+        // render to the dom the newly created house
+    }
+
+
+    // add room
+    static addRoom(id){
+        // new room will be added using the static house to find the id
+        // then the new room will be added to that house based on the matching id
+        for (let house of this.houses){
+            // will look for a house in our array houses using a loop
+            
+            if(house._id == id){
+                // we want the id of the current house we are looking at to match a house id in our current array
+                house.rooms.push(new Room
+                    ($(`#${house._id}-room-name`).val(),
+                    $(`#${house._id}-room-area`).val()));
+                // we will push the new room of the house into our room class (code line 29)
+                // contstructor has two parameters
+                    // name, area  <---- these two must be included
+                // we want the parameters to match up
+                // the name & area will come from the render section below
+                    // w/in our app.prepend section line 218 and 221 so use that in the code line on 168
+                // I split line 160 and 170 on separate lines for easier reading
+                // we are using both jquery method and template literals for these two parameters
+            }
+        }
+    }
+
+    // delete house
+    static deleteHouse(id){
+        HouseService.deleteHouse(id)
+        // this will use the houseService method to delete the house that matches the id
+        // using the deleteHouse method and Id (id was the parameter also used in the original method)
+            .then(() => {
+                // use the .then handle
+                // return a promise
+                return HouseService.getAllHouses();
+                // send an http request to get the updated houses left after deleting one
+                // once we delete a house and it comes back successful
+                // we want to go a head and get/call all the houses again
+            })
+            .then((houses) => this.render(houses));
+            // once we get the houses, we want to render the houses
+            // houses will pass them back into the desktop render house method below
+    }
+
     // build out the render method
     static render(houses){
         // will render to the dom
@@ -148,7 +205,7 @@ class DOMManager{
         $('#app').empty();
         // jquery to find the app by html id
         // empty the app div then rerender everything
-        for(let house of houses){
+        for (let house of houses){
         // use a for loop
             $("#app").prepend(
                 // using prepend so the newest one shows up on top
@@ -157,14 +214,45 @@ class DOMManager{
                 `<div id="${house._id}" class="card">
                     <div class="card-header">
                     <h2>${house.name}</h2>
-                    <button class="btn btn-danger" onclick="DOMManager.deleteHouse("${house._id}")">Delete</delete>
+                    <button class="btn btn-danger" onclick="DOMManager.deleteHouse("${house._id}")">Delete</button>
                     </div>
-                </div>
-                `
+                    <div class="card-body">
+                        <div class="card">
+                        <div class="row">
+                            <div class="col-sm">
+                                <input type="text" id="${house._id}-room-name" class="form-control" placholder="Room Name">
+                            </div>
+                            <div class="col-sm">
+                            <input type="text" id="${house._id}-room-area" class="form-control" placholder="Room Area">
+                            </div>
+                        </div>
+                        <button id="${house._id}-new-room" onclick="DOMManager.addRoom('${house._id}')" class="btn btn-primary form-control">Add</button>
+                        </div>
+                    </div>
+                </div>`
+                // the house in this iteration is of this loop
             );
+            for (let room of house.rooms) {
+                // create a nested loop to add rooms
+                $(`#${house._id}`).find('.card-body').append(
+                   `<p>
+                   <span id="name-${room._id}"><strong>Name: </strong> ${room.name}</span>
+                   <span id="are-${room._id}"><strong>Name: </strong> ${room.area}</span>
+                   <button class="btn btn-danger" onclick="DOMManger.deleteRoom('${house._id}', '${room._id}')"> Delete Room</button>` 
+                );
+            }
         }
     }
 }
 
+
+$('#create-new-house').click(() => {
+    // for the create new house button
+    // cant use onclick for this one
+    DOMManager.createHouse($('#new-house-name').val())
+    // passing the new house name as the value in this line of code
+    $('#new-house-name').val('');
+    // after the new house has been created and pushed to the DOM/api, we will clear that field to allow the user to enter a new house name
+});
 
 DOMManager.getAllHouses();

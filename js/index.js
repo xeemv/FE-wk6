@@ -155,31 +155,6 @@ class DOMManager{
         // render to the dom the newly created house
     }
 
-
-    // add room
-    static addRoom(id){
-        // new room will be added using the static house to find the id
-        // then the new room will be added to that house based on the matching id
-        for (let house of this.houses){
-            // will look for a house in our array houses using a loop
-            
-            if(house._id == id){
-                // we want the id of the current house we are looking at to match a house id in our current array
-                house.rooms.push(new Room
-                    ($(`#${house._id}-room-name`).val(),
-                    $(`#${house._id}-room-area`).val()));
-                // we will push the new room of the house into our room class (code line 29)
-                // contstructor has two parameters
-                    // name, area  <---- these two must be included
-                // we want the parameters to match up
-                // the name & area will come from the render section below
-                    // w/in our app.prepend section line 218 and 221 so use that in the code line on 168
-                // I split line 160 and 170 on separate lines for easier reading
-                // we are using both jquery method and template literals for these two parameters
-            }
-        }
-    }
-
     // delete house
     static deleteHouse(id){
         HouseService.deleteHouse(id)
@@ -198,6 +173,70 @@ class DOMManager{
             // houses will pass them back into the desktop render house method below
     }
 
+    
+    // add room
+    static addRoom(id){
+        // new room will be added using the static house to find the id
+        // then the new room will be added to that house based on the matching id
+        for (let house of this.houses){
+            // will look for a house in our array houses using a loop    
+            if(house._id == id){
+                // we want the id of the current house we are looking at to match a house id in our current array
+                house.rooms.push(new Room($(`#${house._id}-room-name`).val(),$(`#${house._id}-room-area`).val()));
+                // we will push the new room of the house into our room class (code line 29)
+                // contstructor has two parameters
+                    // name, area  <---- these two must be included
+                // we want the parameters to match up
+                // the name & area will come from the render section below
+                    // w/in our app.prepend section line 218 and 221 so use that in the code line on 168
+                // I split line 160 and 170 on separate lines for easier reading
+                // we are using both jquery method and template literals for these two parameters
+                HouseService.updateHouse(house)
+                    // going to take the updated house with the new room to the rooms array
+                    // then send an update to the request api to save this updated data
+                   .then(() => {
+                       // handle the promise
+                       return HouseService.getAllHouses();
+                    // get all the houses   
+                   })
+                   .then((houses) => this.render(houses))
+                // handle another promise
+                // rerender them once the houses have been updated
+            }
+        }
+    }
+
+
+    // deleting a room
+    static deleteRoom(houseId, roomId){
+        for (let house of this.houses){
+            // loop to make sure that the house matches the house in the api data
+            if (house._id == houseId){
+                // making sure that the house id assigned by the database matches the houseId being passed in
+                for (let room of house.rooms){
+                    // loop to make sure that the room matches the house's current room in the api data
+                    if (room._id == roomId){
+                        // making sure that room id assigned by the database matches the roomId being passed in
+                       house.rooms.splice(house.rooms.indexOf(room), 1);
+                     // this is saying if we found the right house and room
+                    // splice will remove that room(element) from the room's index array
+                       HouseService.updateHouse(house)
+                       // going to take the updated house after deleting that room 
+                      // then send an update to the request api to save this updated data
+                       .then(() => {
+                           return HouseService.getAllHouses();
+                            // get all the houses w/ anything that is new  
+                       }) 
+                       .then((houses) => this.render(houses));
+                       // handle another promise
+                      // rerender them once the houses have been updated
+                    }
+                }
+            }
+        }
+    }
+
+
     // build out the render method
     static render(houses){
         // will render to the dom
@@ -213,23 +252,23 @@ class DOMManager{
                 // write the html in js using template literals
                 `<div id="${house._id}" class="card">
                     <div class="card-header">
-                    <h2>${house.name}</h2>
-                    <button class="btn btn-danger" onclick="DOMManager.deleteHouse("${house._id}")">Delete</button>
+                        <h2>${house.name}</h2>
+                        <button class="btn btn-danger" onclick="DOMManager.deleteHouse('${house._id}')">Delete</button>
                     </div>
                     <div class="card-body">
                         <div class="card">
-                        <div class="row">
-                            <div class="col-sm">
-                                <input type="text" id="${house._id}-room-name" class="form-control" placholder="Room Name">
+                            <div class="row">
+                                <div class="col-sm">
+                                    <input type="text" id="${house._id}-room-name" class="form-control" placeholder="Room Name">
+                                </div>
+                                <div class="col-sm">
+                                    <input type="text" id="${house._id}-room-area" class="form-control" placeholder="Room Area">
+                                </div>
                             </div>
-                            <div class="col-sm">
-                            <input type="text" id="${house._id}-room-area" class="form-control" placholder="Room Area">
-                            </div>
-                        </div>
-                        <button id="${house._id}-new-room" onclick="DOMManager.addRoom('${house._id}')" class="btn btn-primary form-control">Add</button>
+                            <button id="${house._id}-new-room" onclick="DOMManager.addRoom('${house._id}')" class="btn btn-primary form-control">Add</button>
                         </div>
                     </div>
-                </div>`
+                </div>` 
                 // the house in this iteration is of this loop
             );
             for (let room of house.rooms) {
